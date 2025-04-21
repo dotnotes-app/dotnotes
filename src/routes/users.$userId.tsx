@@ -5,7 +5,7 @@ import {
     type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { NotFound } from "~/components/NotFound";
-import { userQueryOptions } from "~/utils/users";
+import { userQueryOptions } from "~/providers/users";
 
 export const Route = createFileRoute("/users/$userId")({
     loader: async ({ context, params: { userId } }) => {
