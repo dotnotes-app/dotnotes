@@ -1,0 +1,19 @@
+{
+    "printWidth": 85,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+    "importOrder": [
+        "^react$",
+        "<BUILT_IN_MODULES>",
+        "<THIRD_PARTY_MODULES>",
+        "",
+        "^resources/(.*)$",
+        "",
+        "^\\.\\./",
+        "",
+        "^(\\./|\\.$)"
+    ],
+    "importOrderParserPlugins": ["typescript", "jsx"],
+    "importOrderTypeScriptVersion": "5.0.0"
+}
