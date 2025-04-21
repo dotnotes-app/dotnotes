@@ -1,17 +1,16 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-
-import { usersQueryOptions } from "../providers/users";
+import usersProvider from "~/providers/users";
 
 export const Route = createFileRoute("/users")({
     loader: async ({ context }) => {
-        await context.queryClient.ensureQueryData(usersQueryOptions());
+        await context.queryClient.ensureQueryData(usersProvider.users());
     },
     component: UsersComponent,
 });
 
 function UsersComponent() {
-    const usersQuery = useSuspenseQuery(usersQueryOptions());
+    const usersQuery = useSuspenseQuery(usersProvider.users());
 
     return (
         <div className="p-2 flex gap-2">

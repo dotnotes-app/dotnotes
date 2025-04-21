@@ -9,7 +9,7 @@ export type User = {
     email: string;
 };
 
-export const fetchUsers = createServerFn({ method: "GET" }).handler(async () => {
+const fetchUsers = createServerFn({ method: "GET" }).handler(async () => {
     try {
         const users = await axios.get<Array<User>>(
             "https://jsonplaceholder.typicode.com/users/"
@@ -27,14 +27,14 @@ export const fetchUsers = createServerFn({ method: "GET" }).handler(async () => 
     }
 });
 
-export const usersQueryOptions = () => {
+const usersQuery = () => {
     return queryOptions({
         queryKey: ["users"],
         queryFn: () => fetchUsers(),
     });
 };
 
-export const fetchUser = createServerFn({ method: "GET" })
+const fetchUser = createServerFn({ method: "GET" })
     .validator((id: string) => id)
     .handler(async ({ data }) => {
         try {
@@ -54,8 +54,13 @@ export const fetchUser = createServerFn({ method: "GET" })
         }
     });
 
-export const userQueryOptions = (id: string) =>
+const userQuery = (id: string) =>
     queryOptions({
         queryKey: ["users", id],
         queryFn: () => fetchUser({ data: id }),
     });
+
+export default {
+    user: userQuery,
+    users: usersQuery,
+};
