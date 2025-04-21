@@ -5,11 +5,11 @@ import {
     type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { NotFound } from "~/components/NotFound";
-import usersProvider from "~/providers/users";
+import userQueries from "~/queries/users";
 
 export const Route = createFileRoute("/users/$userId")({
     loader: async ({ context, params: { userId } }) => {
-        await context.queryClient.ensureQueryData(usersProvider.user(userId));
+        await context.queryClient.ensureQueryData(userQueries.user(userId));
     },
     component: UserComponent,
     errorComponent: UserErrorComponent,
@@ -24,7 +24,7 @@ function UserErrorComponent({ error }: ErrorComponentProps) {
 
 function UserComponent() {
     const params = Route.useParams();
-    const userQuery = useSuspenseQuery(usersProvider.user(params.userId));
+    const userQuery = useSuspenseQuery(userQueries.user(params.userId));
     const user = userQuery.data;
 
     return (

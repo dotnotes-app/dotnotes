@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { NotFound } from "~/components/NotFound";
 
-import { postQueryOptions } from "../providers/posts";
+import { postQueryOptions } from "../queries/posts";
 
 export const Route = createFileRoute("/posts/$postId")({
     loader: async ({ params: { postId }, context }) => {

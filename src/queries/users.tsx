@@ -9,6 +9,8 @@ export type User = {
     email: string;
 };
 
+const TOPIC = "users" as const;
+
 const fetchUsers = createServerFn({ method: "GET" }).handler(async () => {
     try {
         const users = await axios.get<Array<User>>(
@@ -29,7 +31,7 @@ const fetchUsers = createServerFn({ method: "GET" }).handler(async () => {
 
 const usersQuery = () => {
     return queryOptions({
-        queryKey: ["users"],
+        queryKey: [TOPIC],
         queryFn: () => fetchUsers(),
     });
 };
@@ -56,7 +58,7 @@ const fetchUser = createServerFn({ method: "GET" })
 
 const userQuery = (id: string) =>
     queryOptions({
-        queryKey: ["users", id],
+        queryKey: [TOPIC, id],
         queryFn: () => fetchUser({ data: id }),
     });
 
