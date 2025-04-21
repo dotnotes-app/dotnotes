@@ -6,13 +6,12 @@ import {
     type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { NotFound } from "~/components/NotFound";
-
-import { postQueryOptions } from "../queries/posts";
+import postQueries from "~/queries/posts";
 
 export const Route = createFileRoute("/posts/$postId")({
     loader: async ({ params: { postId }, context }) => {
         const data = await context.queryClient.ensureQueryData(
-            postQueryOptions(postId)
+            postQueries.post(postId)
         );
 
         return {
@@ -35,7 +34,7 @@ export function PostErrorComponent({ error }: ErrorComponentProps) {
 
 function PostComponent() {
     const { postId } = Route.useParams();
-    const postQuery = useSuspenseQuery(postQueryOptions(postId));
+    const postQuery = useSuspenseQuery(postQueries.post(postId));
 
     return (
         <div className="space-y-2">

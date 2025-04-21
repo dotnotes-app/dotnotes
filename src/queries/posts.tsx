@@ -9,39 +9,51 @@ export type PostType = {
     body: string;
 };
 
-export const fetchPosts = createServerFn({ method: "GET" }).handler(async () => {
-    console.info("Fetching posts...");
-    return axios
-        .get<Array<PostType>>("https://jsonplaceholder.typicode.com/posts")
-        .then((r) => r.data.slice(0, 10));
+const TOPIC = "posts" as const;
+
+const fetchPosts = createServerFn({ method: "GET" }).handler(async () => {
+    const response = await axios.get<Array<PostType>>(
+        "https://jsonplaceholder.typicode.com/posts"
+    );
+
+    return response.data.slice(0, 10);
 });
 
-export const postsQueryOptions = () =>
-    queryOptions({
-        queryKey: ["posts"],
+const postsQuery = () => {
+    return queryOptions({
+        queryKey: [TOPIC],
         queryFn: () => fetchPosts(),
     });
+};
 
-export const fetchPost = createServerFn({ method: "GET" })
+const fetchPost = createServerFn({ method: "GET" })
     .validator((d: string) => d)
     .handler(async ({ data }) => {
         console.info(`Fetching post with id ${data}...`);
-        const post = await axios
-            .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${data}`)
-            .then((r) => r.data)
-            .catch((err) => {
-                console.error(err);
-                if (err.status === 404) {
-                    throw notFound();
-                }
-                throw err;
-            });
+        try {
+            const response = await axios.get<PostType>(
+                `https://jsonplaceholder.typicode.com/posts/${data}`
+            );
+            return response.data;
+        } catch (err) {
+            console.error(err);
 
-        return post;
+            if (err instanceof Error && "status" in err && err.status === 404) {
+                throw notFound();
+            }
+
+            throw err;
+        }
     });
 
-export const postQueryOptions = (postId: string) =>
-    queryOptions({
-        queryKey: ["post", postId],
-        queryFn: () => fetchPost({ data: postId }),
+const postQuery = (id: string) => {
+    return queryOptions({
+        queryKey: ["post", id],
+        queryFn: () => fetchPost({ data: id }),
     });
+};
+
+export default {
+    posts: postsQuery,
+    post: postQuery,
+};
