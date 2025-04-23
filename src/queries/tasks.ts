@@ -4,8 +4,8 @@ import {
     UseMutationOptions,
     useQueryClient,
 } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
 import { createServerFn, useServerFn } from "@tanstack/react-start";
+import { eq } from "drizzle-orm";
 
 import { db } from "../db";
 import { InsertTask, tasksTable } from "../db/schema";
@@ -42,7 +42,6 @@ const createTaskServerFn = createServerFn({ method: "POST" })
 export const useCreateTask = (
     options?: UseMutationOptions<unknown, Error, InsertTask>
 ) => {
-    const router = useRouter();
     const queryClient = useQueryClient();
     const createTask = useServerFn(createTaskServerFn);
 
@@ -51,7 +50,34 @@ export const useCreateTask = (
         mutationKey: [TOPIC],
         mutationFn: (task) => createTask({ data: task }),
         onSuccess: (data, variables, context) => {
-            router.invalidate();
+            queryClient.invalidateQueries({ queryKey: [TOPIC] });
+            options?.onSuccess?.(data, variables, context);
+        },
+    });
+};
+
+const deleteTaskServerFn = createServerFn({ method: "POST" })
+    .validator((data: { id: number }) => data)
+    .handler(async ({ data }) => {
+        try {
+            return await db.delete(tasksTable).where(eq(tasksTable.id, data.id));
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    });
+
+export const useDeleteTask = (
+    options?: UseMutationOptions<unknown, Error, { id: number }>
+) => {
+    const queryClient = useQueryClient();
+    const deleteTask = useServerFn(deleteTaskServerFn);
+
+    return useMutation({
+        ...options,
+        mutationKey: [TOPIC],
+        mutationFn: (task) => deleteTask({ data: task }),
+        onSuccess: (data, variables, context) => {
             queryClient.invalidateQueries({ queryKey: [TOPIC] });
             options?.onSuccess?.(data, variables, context);
         },
