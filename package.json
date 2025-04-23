@@ -23,6 +23,7 @@
         "@tanstack/react-start": "^1.116.2",
         "dotenv": "^16.5.0",
         "drizzle-orm": "^0.42.0",
+        "motion": "12.8.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "redaxios": "^0.5.1",
