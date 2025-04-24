@@ -54,27 +54,29 @@ function RouteComponent() {
                     Tasks {createTask.isPending && <DelayedLoadingIndicator />}
                 </h3>
                 <div className="flex gap-2 my-4">
-                    <input
-                        ref={titleInputRef}
-                        className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm"
-                        type="text"
-                        placeholder="Task Title"
-                        disabled={createTask.isPending}
-                        value={taskTitle}
-                        autoFocus
-                        onChange={(e) => setTaskTitle(e.target.value)}
-                    />
-                    <input
-                        className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm"
-                        type="text"
-                        placeholder="Task Description"
-                        disabled={createTask.isPending}
-                        value={taskDescription}
-                        onChange={(e) => setTaskDescription(e.target.value)}
-                    />
+                    <div className="flex-grow flex gap-4">
+                        <input
+                            ref={titleInputRef}
+                            className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm w-1/3"
+                            type="text"
+                            placeholder="Task Title"
+                            disabled={createTask.isPending}
+                            value={taskTitle}
+                            autoFocus
+                            onChange={(e) => setTaskTitle(e.target.value)}
+                        />
+                        <input
+                            className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm w-2/3"
+                            type="text"
+                            placeholder="Task Description"
+                            disabled={createTask.isPending}
+                            value={taskDescription}
+                            onChange={(e) => setTaskDescription(e.target.value)}
+                        />
+                    </div>
                     <button
                         type="submit"
-                        className="bg-green-500 border-green-400 text-blue-950 border-2 rounded-md px-4 py-2 text-sm"
+                        className="bg-green-500 hover:bg-green-600 text-white border-2 rounded-md px-4 py-2 text-sm"
                         disabled={createTask.isPending}
                     >
                         Add Task
@@ -104,11 +106,17 @@ function RouteComponent() {
                                         console.log("TODO: Update Task", task.id);
                                     }}
                                 />
-                                <h3>{task.title}</h3>
-                                <p className="text-gray-400">{task.description}</p>
-                                <div className="self-end">
+                                <div className="flex-grow flex flex-col gap-2">
+                                    <h3 className="font-bold">{task.title}</h3>
+                                    {task.description && (
+                                        <p className="text-gray-500">
+                                            {task.description}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="">
                                     <button
-                                        className="bg-red-300 text-white rounded-md px-2 py-1 text-sm"
+                                        className="bg-red-500 hover:bg-red-600 text-white border-2 rounded-md px-4 py-2 text-sm"
                                         onClick={() => {
                                             deleteTask.mutate({ id: task.id });
                                         }}
