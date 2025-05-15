@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import DelayedLoadingIndicator from "../../components/DelayedLoadingSpinner";
 import { tasksQuery, useCreateTask, useDeleteTask } from "../../queries/tasks";
@@ -10,14 +10,18 @@ export const Route = createFileRoute("/tasks/")({
     loader: async ({ context }) => {
         await context.queryClient.ensureQueryData(tasksQuery());
     },
+    validateSearch: (search) => ({
+        title: String(search.title),
+        description: String(search.description),
+    }),
 });
 
 function RouteComponent() {
     const tasks = useSuspenseQuery(tasksQuery());
 
-    const [taskTitle, setTaskTitle] = useState("");
-    const [taskDescription, setTaskDescription] = useState("");
     const titleInputRef = useRef<HTMLInputElement>(null);
+    const navigate = useNavigate({ from: Route.fullPath });
+    const search = Route.useSearch();
 
     const createTask = useCreateTask();
     const deleteTask = useDeleteTask();
@@ -28,55 +32,68 @@ function RouteComponent() {
         await createTask.mutateAsync(
             {
                 userId: 1,
-                title: taskTitle,
-                description: taskDescription,
+                title: search.title,
+                description: search.description,
                 isCompleted: false,
             },
             {
                 onSuccess: () => {
-                    setTaskTitle("");
-                    setTaskDescription("");
+                    navigate({ search: { title: "", description: "" } });
                 },
             }
         );
     };
 
     useEffect(() => {
-        if (taskTitle.length === 0) {
+        if (search.title.length === 0) {
             titleInputRef.current?.focus();
         }
-    }, [taskTitle]);
+    }, [search.title]);
 
     return (
         <div className="p-8">
             <form onSubmit={handleSubmit}>
-                <h3 className="text-4xl my-10">
+                <h3 className="my-10 text-4xl">
                     Tasks {createTask.isPending && <DelayedLoadingIndicator />}
                 </h3>
-                <div className="flex gap-2 my-4">
-                    <div className="flex-grow flex gap-4">
+                <div className="my-4 flex gap-2">
+                    <div className="flex flex-grow gap-4">
                         <input
                             ref={titleInputRef}
-                            className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm w-1/3"
+                            className="w-1/3 rounded-md border-2 border-gray-300 px-4 py-2 text-sm"
                             type="text"
                             placeholder="Task Title"
                             disabled={createTask.isPending}
-                            value={taskTitle}
+                            value={search.title}
                             autoFocus
-                            onChange={(e) => setTaskTitle(e.target.value)}
+                            onChange={(e) =>
+                                navigate({
+                                    search: {
+                                        title: e.target.value,
+                                        description: search.description,
+                                    },
+                                })
+                            }
                         />
                         <input
-                            className="border-2 border-gray-300 rounded-md px-4 py-2 text-sm w-2/3"
+                            className="w-2/3 rounded-md border-2 border-gray-300 px-4 py-2 text-sm"
                             type="text"
                             placeholder="Task Description"
                             disabled={createTask.isPending}
-                            value={taskDescription}
-                            onChange={(e) => setTaskDescription(e.target.value)}
+                            value={search.description}
+                            onChange={(e) =>
+                                navigate({
+                                    search: {
+                                        description: e.target.value,
+                                        title: search.title,
+                                    },
+                                })
+                            }
                         />
                     </div>
                     <button
                         type="submit"
-                        className="bg-green-500 hover:bg-green-600 text-white border-2 rounded-md px-4 py-2 text-sm"
+                        className="rounded-md border-2 bg-green-500 px-4 py-2 text-sm text-white hover:bg-green-600"
                         disabled={createTask.isPending}
                     >
                         Add Task
@@ -97,26 +114,44 @@ function RouteComponent() {
                         return (
                             <div
                                 key={task.id}
-                                className="border-2 border-gray-300 rounded-lg p-2 gap-4 flex items-center"
+                                className="flex items-center gap-4 rounded-lg border-2 border-gray-300 p-2"
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={task.isCompleted}
-                                    onChange={() => {
-                                        console.log("TODO: Update Task", task.id);
-                                    }}
-                                />
-                                <div className="flex-grow flex flex-col gap-2">
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={task.isCompleted}
+                                        onChange={() => {
+                                            console.log(
+                                                "TODO: Update Task",
+                                                task.id
+                                            );
+                                        }}
+                                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border-2 border-gray-300 transition-colors checked:border-green-600 checked:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-200"
+                                    />
+                                    <svg
+                                        className="pointer-events-none absolute left-1 top-1 h-3 w-3 text-white opacity-0 peer-checked:opacity-100"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <div className="flex flex-grow flex-col gap-2">
                                     <h3 className="font-bold">{task.title}</h3>
                                     {task.description && (
                                         <p className="text-gray-500">
-                                            {task.description}
+                                            {task.description}{" "}
                                         </p>
                                     )}
                                 </div>
                                 <div className="">
                                     <button
-                                        className="bg-red-500 hover:bg-red-600 text-white border-2 rounded-md px-4 py-2 text-sm"
+                                        className="rounded-md border-2 bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600"
                                         onClick={() => {
                                             deleteTask.mutate({ id: task.id });
                                         }}
