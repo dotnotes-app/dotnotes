@@ -10,10 +10,12 @@ export const Route = createFileRoute("/tasks/")({
     loader: async ({ context }) => {
         await context.queryClient.ensureQueryData(tasksQuery());
     },
-    validateSearch: (search) => ({
-        title: String(search.title),
-        description: String(search.description),
-    }),
+    validateSearch: (search) => {
+        return {
+            title: (search.title as string) || "",
+            description: (search.description as string) || "",
+        };
+    },
 });
 
 function RouteComponent() {
@@ -64,31 +66,29 @@ function RouteComponent() {
                             type="text"
                             placeholder="Task Title"
                             disabled={createTask.isPending}
-                            value={search.title}
                             autoFocus
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 navigate({
                                     search: {
                                         title: e.target.value,
                                         description: search.description,
                                     },
-                                })
-                            }
+                                });
+                            }}
                         />
                         <input
                             className="w-2/3 rounded-md border-2 border-gray-300 px-4 py-2 text-sm"
                             type="text"
                             placeholder="Task Description"
                             disabled={createTask.isPending}
-                            value={search.description}
-                            onChange={(e) =>
+                            onChange={(e) => {
                                 navigate({
                                     search: {
                                         description: e.target.value,
                                         title: search.title,
                                     },
-                                })
-                            }
+                                });
+                            }}
                         />
                     </div>
                     <button
